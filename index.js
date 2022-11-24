@@ -25,6 +25,24 @@ async function dbConnect() {
 
 dbConnect();
 
+const Category = client.db('bookisWorldBook').collection('categories');
+const CategoryName = client.db('bookisWorldBook').collection('categoryName');
+
+app.get('/categoryName', async (req, res) => {
+    try {
+        const query = {};
+        const result = await CategoryName.find(query).toArray();
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 app.get('/', async (req, res) => {
     res.send(`Server is running`)
 });
