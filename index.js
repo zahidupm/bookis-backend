@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 require('colors');
 
@@ -32,6 +32,37 @@ app.get('/categoryName', async (req, res) => {
     try {
         const query = {};
         const result = await CategoryName.find(query).toArray();
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.get('/category/:category_id', async (req, res) => {
+    try {
+        const category_id = req.params.category_id;
+        const query = {category_id}
+        const result = await Category.find(query);
+        res.send(result);
+
+    }   catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.get('/categories', async (req, res) => {
+    try {
+        const query = {};
+        const result = await Category.find(query).toArray();
         res.send(result);
 
     } catch (error) {
