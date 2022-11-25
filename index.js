@@ -27,6 +27,7 @@ dbConnect();
 
 const Category = client.db('bookisWorldBook').collection('categories');
 const CategoryName = client.db('bookisWorldBook').collection('categoryName');
+const Booking = client.db('bookisWorldBook').collection('bookings');
 
 app.get('/categoryName', async (req, res) => {
     try {
@@ -46,7 +47,7 @@ app.get('/categoryName', async (req, res) => {
 app.get('/category/:category_id', async (req, res) => {
     try {
         const category_id = req.params.category_id;
-        const query = {category_id}
+        const query = {category_id};
         const result = await Category.find(query);
         res.send(result);
 
@@ -59,6 +60,7 @@ app.get('/category/:category_id', async (req, res) => {
     }
 })
 
+// all category
 app.get('/categories', async (req, res) => {
     try {
         const query = {};
@@ -66,6 +68,23 @@ app.get('/categories', async (req, res) => {
         res.send(result);
 
     } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// booking
+app.post('/bookings', async (req, res) => {
+    try {
+        const booking = req.body;
+        console.log(booking);
+        const result = await Booking.insertOne(booking);
+        res.send(result);
+
+    }  catch (error) {
         console.log(error.name.red, error.message.bold);
         res.send({
             success: false,
