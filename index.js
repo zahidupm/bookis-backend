@@ -44,11 +44,11 @@ app.get('/categoryName', async (req, res) => {
     }
 })
 
-app.get('/category/:category_id', async (req, res) => {
+app.get('/category/:id', async (req, res) => {
     try {
-        const category_id = req.params.category_id;
-        const query = {category_id};
-        const result = await Category.find(query);
+        const id = req.params.id;
+        const query = {category_id: id};
+        const result = await Category.find(query).toArray();
         res.send(result);
 
     }   catch (error) {
@@ -80,7 +80,7 @@ app.get('/categories', async (req, res) => {
 app.post('/bookings', async (req, res) => {
     try {
         const booking = req.body;
-        console.log(booking);
+        // console.log(booking);
         const result = await Booking.insertOne(booking);
         res.send(result);
 
