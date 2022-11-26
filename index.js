@@ -32,6 +32,21 @@ const CategoryName = client.db('bookisWorldBook').collection('categoryName');
 const Booking = client.db('bookisWorldBook').collection('bookings');
 const User = client.db('bookisWorldBook').collection('users');
 
+function verifyJWT (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if(!authHeader) {
+        return res.status(401).send('unauthorized access')
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if(err) {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
 app.get('/categoryName', async (req, res) => {
     try {
         const query = {};
@@ -79,9 +94,14 @@ app.get('/categories', async (req, res) => {
     }
 })
 
-app.get('/bookings', async (req, res) => {
+app.get('/bookings', verifyJWT, async (req, res) => {
     try {
         const email = req.query.email;
+        // console.log('token', req.headers.authorization);
+        const decodedEmail = req.decoded.email;
+        if (email !== decodedEmail) {
+            return res.status(403).send({message: 'forbidden access'})
+        }
         const query = { email: email };
         const bookings = await Booking.find(query).toArray();
         res.send(bookings);
