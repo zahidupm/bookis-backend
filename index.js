@@ -76,6 +76,22 @@ app.get('/categories', async (req, res) => {
     }
 })
 
+app.get('/bookings', async (req, res) => {
+    try {
+        const email = req.query.email;
+        const query = { email: email };
+        const bookings = await Booking.find(query).toArray();
+        res.send(bookings);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 // booking
 app.post('/bookings', async (req, res) => {
     try {
