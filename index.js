@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const { reset } = require('colors');
 require('dotenv').config();
 require('colors');
 
@@ -100,6 +102,27 @@ app.post('/bookings', async (req, res) => {
         // console.log(booking);
         const result = await Booking.insertOne(booking);
         res.send(result);
+
+    }  catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// jwt 
+app.get('/jwt', async (req, res) => {
+    try {
+        const email = req.query.email;
+        const query = {email: email};
+        const user = await User.findOne(query);
+        if(user) {
+            const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '7d' });
+            return res.send({ accessToken: token})
+        }
+        res.status(403).send({accessToken: ''})
 
     }  catch (error) {
         console.log(error.name.red, error.message.bold);
