@@ -62,7 +62,7 @@ app.get('/categoryName', async (req, res) => {
     }
 })
 
-app.get('/category/:id', async (req, res) => {
+app.get('/category', async (req, res) => {
     try {
         const id = req.params.id;
         const query = {category_id: id};
@@ -167,7 +167,92 @@ app.post('/users', async (req, res) => {
             message: error.message
         })
     }
+});
+
+app.get('/users', async (req, res) => {
+    try {
+        const query = {};
+        const users = await User.find(query).toArray();
+        res.send(users);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
 })
+
+// admin or seller or user
+app.put('/users/admin/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id) };
+        const options = {}
+        const updatedDoc = {
+            $set: {
+                role: 'admin'
+            }
+        }
+        const result = await User.updateOne(filter, updatedDoc, options);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// user
+app.put('/users/user', async (req, res) => {
+    try {
+        const email = req.query.email;
+        const filter = { email: email };
+        const options = {}
+        const updatedDoc = {
+            $set: {
+                role: 'user'
+            }
+        }
+        const result = await User.updateOne(filter, updatedDoc, options);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// seller
+app.put('/users/seller', async (req, res) => {
+    try {
+        const email = req.query.email;
+        const filter = { email: email };
+        const options = {}
+        const updatedDoc = {
+            $set: {
+                role: 'seller'
+            }
+        }
+        const result = await User.updateOne(filter, updatedDoc, options);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 
 app.get('/', async (req, res) => {
     res.send(`Server is running`)
