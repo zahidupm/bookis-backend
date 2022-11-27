@@ -242,6 +242,23 @@ app.get('/users/seller/:email', async (req, res) => {
     }
 })
 
+// isBuyer 
+app.get('/users/buyer/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const query = { email }
+        const user = await User.findOne(query);
+        res.send({isBuyer: user?.role === 'buyer'});
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 // admin or seller or user
 app.put('/users/admin/:id', verifyJWT, async (req, res) => {
     try {
