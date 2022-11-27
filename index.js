@@ -184,9 +184,33 @@ app.get('/users', async (req, res) => {
     }
 })
 
-// admin or seller or user
-app.put('/users/admin/:id', async (req, res) => {
+// is admin 
+app.get('/users/admin/:email', async (req, res) => {
     try {
+        const email = req.params.email;
+        const query = { email }
+        const user = await User.findOne(query);
+        res.send({isAdmin: user?.role === 'admin'});
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// admin or seller or user
+app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+    try {
+        const decodedEmail = req.decoded.email;
+        const query = { email: decodedEmail};
+        const user = await User.findOne(query);
+        if(user?.role !== 'admin') {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+
         const id = req.params.id;
         const filter = { _id: ObjectId(id) };
         const options = {}
@@ -208,14 +232,14 @@ app.put('/users/admin/:id', async (req, res) => {
 })
 
 // user
-app.put('/users/user', async (req, res) => {
+app.put('/users/buyer', async (req, res) => {
     try {
         const email = req.query.email;
         const filter = { email: email };
         const options = {}
         const updatedDoc = {
             $set: {
-                role: 'user'
+                role: 'buyer'
             }
         }
         const result = await User.updateOne(filter, updatedDoc, options);
