@@ -33,18 +33,26 @@ const Booking = client.db('bookisWorldBook').collection('bookings');
 const User = client.db('bookisWorldBook').collection('users');
 
 function verifyJWT (req, res, next) {
-    const authHeader = req.headers.authorization;
-    if(!authHeader) {
-        return res.status(401).send('unauthorized access')
-    }
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
-        if(err) {
-            return res.status(403).send({message: 'forbidden access'})
+    try {
+        const authHeader = req.headers.authorization;
+        if(!authHeader) {
+            return res.status(401).send('unauthorized access')
         }
-        req.decoded = decoded;
-        next();
-    })
+        const token = authHeader.split(' ')[1];
+        jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+            if(err) {
+                return res.status(403).send({message: 'forbidden access'})
+            }
+            req.decoded = decoded;
+            next();
+        })
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
 }
 
 app.get('/categoryName', async (req, res) => {
@@ -62,7 +70,23 @@ app.get('/categoryName', async (req, res) => {
     }
 })
 
-app.get('/category', async (req, res) => {
+// categoryName
+app.post('/categoryName', async (req, res) => {
+    try {
+       const filter = req.body;
+        const result = await CategoryName.insertOne(filter);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.get('/category/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const query = {category_id: id};
@@ -191,6 +215,23 @@ app.get('/users/admin/:email', async (req, res) => {
         const query = { email }
         const user = await User.findOne(query);
         res.send({isAdmin: user?.role === 'admin'});
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// is seller
+app.get('/users/seller/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const query = { email }
+        const user = await User.findOne(query);
+        res.send({isSeller: user?.role === 'seller'});
 
     } catch (error) {
         console.log(error.name.red, error.message.bold);
