@@ -335,6 +335,43 @@ app.put('/users/seller', async (req, res) => {
     }
 })
 
+// add product 
+app.post('/categories', async (req, res) => {
+    try {
+        const product = req.body;
+        const result = await Category.insertOne(product);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// get the seller product
+app.get('/categories/my_products', verifyJWT, async (req, res) => {
+    try {
+        const email = req.query.email;
+        // console.log('token', req.headers.authorization);
+        const decodedEmail = req.decoded.email;
+        if (email !== decodedEmail) {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+        const query = { email: email };
+        const products = await Category.find(query).toArray();
+        res.send(products);
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 
 app.get('/', async (req, res) => {
     res.send(`Server is running`)
