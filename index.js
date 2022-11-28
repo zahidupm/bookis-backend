@@ -55,6 +55,47 @@ function verifyJWT (req, res, next) {
     }
 }
 
+// verify Admin // NOTE: make sure use verifyAdmin after verifyJWT
+const verifyAdmin = async (req, res, next) => {
+    try {
+        // console.log('inside verifyAdmin',req.decoded.email);
+        const decodedEmail = req.decoded.email;
+        const query = { email: decodedEmail };
+        const user = await User.findOne(query);
+        if(user?.role !== 'admin') {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+        next();
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+// verify seller
+// verify seller // NOTE: make sure use verifyAdmin after verifyJWT
+const verifySeller = async (req, res, next) => {
+    try {
+        // console.log('inside verifyAdmin',req.decoded.email);
+        const decodedEmail = req.decoded.email;
+        const query = { email: decodedEmail };
+        const user = await User.findOne(query);
+        if(user?.role !== 'seller') {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+        next();
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
 app.get('/categoryName', async (req, res) => {
     try {
         const query = {};
@@ -167,6 +208,23 @@ app.get('/jwt', async (req, res) => {
             return res.send({ accessToken: token})
         }
         res.status(403).send({accessToken: ''})
+
+    }  catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// user delete 
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id)}
+        const result = await User.deleteOne(filter);
+        res.send(result);
 
     }  catch (error) {
         console.log(error.name.red, error.message.bold);
@@ -364,6 +422,23 @@ app.get('/categories/my_products', verifyJWT, async (req, res) => {
         const products = await Category.find(query).toArray();
         res.send(products);
     } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// seller deleted
+app.delete('/categories/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id)}
+        const result = await Category.deleteOne(filter);
+        res.send(result);
+
+    }  catch (error) {
         console.log(error.name.red, error.message.bold);
         res.send({
             success: false,
