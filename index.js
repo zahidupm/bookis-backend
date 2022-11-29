@@ -283,6 +283,23 @@ app.get('/users/admin/:email', async (req, res) => {
     }
 })
 
+// all sellers
+app.get('/users/all_sellers', async (req, res) => {
+    try {
+        const role = req.query.role;
+        // const query = { role: role}
+        const result = await User.find({role: 'seller'}).toArray();
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 // is seller
 app.get('/users/seller/:email', async (req, res) => {
     try {
@@ -333,6 +350,36 @@ app.put('/users/admin/:id', verifyJWT, async (req, res) => {
         const updatedDoc = {
             $set: {
                 role: 'admin'
+            }
+        }
+        const result = await User.updateOne(filter, updatedDoc, options);
+        res.send(result);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// make verified
+app.put('/users/verified/:id', verifyJWT, async (req, res) => {
+    try {
+        const decodedEmail = req.decoded.email;
+        const query = { email: decodedEmail};
+        const user = await User.findOne(query);
+        if(user?.role !== 'admin') {
+            return res.status(403).send({message: 'forbidden access'})
+        }
+
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id) };
+        const options = {}
+        const updatedDoc = {
+            $set: {
+                status: 'verified'
             }
         }
         const result = await User.updateOne(filter, updatedDoc, options);
