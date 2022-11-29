@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { reset } = require('colors');
 require('dotenv').config();
 require('colors');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ const Category = client.db('bookisWorldBook').collection('categories');
 const CategoryName = client.db('bookisWorldBook').collection('categoryName');
 const Booking = client.db('bookisWorldBook').collection('bookings');
 const User = client.db('bookisWorldBook').collection('users');
+const Payment = client.db('bookisWorldBook').collection('payments');
 
 function verifyJWT (req, res, next) {
     try {
@@ -189,6 +191,75 @@ app.post('/bookings', async (req, res) => {
         res.send(result);
 
     }  catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// booking payment
+app.get('/bookings/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id)}
+        const booking = await Booking.findOne(query);
+        res.send(booking);
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// payment stripe
+app.post('/create-payment-intent', async (req, res) => {
+    try {
+        const booking = req.body;
+        const price = booking.price;
+        const amount = price * 100;
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            currency: "usd",
+            amount: amount,
+            "payment_method_types": [
+                "card"
+            ]
+        })
+        res.send({
+            clientSecret: paymentIntent.client_secret,
+          });
+
+    } catch (error) {
+        console.log(error.name.red, error.message.bold);
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.post('/payments', async (req, res) => {
+    try {
+        const payment = req.body;
+        const result = await Payment.insertOne(payment);
+        // booking collection data transfer
+        const id = payment.bookingId;
+        const filter = { _id: ObjectId(id) }
+        const updatedDoc = {
+            $set: {
+                paid: true,
+                transactionId: payment.transactionId
+            }
+        }
+        const updatedResult = await Booking.updateOne(filter, updatedDoc)
+        res.send(result);
+
+    } catch (error) {
         console.log(error.name.red, error.message.bold);
         res.send({
             success: false,
