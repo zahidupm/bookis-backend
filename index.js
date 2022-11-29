@@ -284,7 +284,7 @@ app.get('/users/admin/:email', async (req, res) => {
 })
 
 // all sellers
-app.get('/users/all_sellers', async (req, res) => {
+app.get('/users/all_sellers', verifyJWT, verifyAdmin, async (req, res) => {
     try {
         const role = req.query.role;
         // const query = { role: role}
@@ -335,14 +335,14 @@ app.get('/users/buyer/:email', async (req, res) => {
 })
 
 // admin or seller or user
-app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+app.put('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
     try {
-        const decodedEmail = req.decoded.email;
-        const query = { email: decodedEmail};
-        const user = await User.findOne(query);
-        if(user?.role !== 'admin') {
-            return res.status(403).send({message: 'forbidden access'})
-        }
+        // const decodedEmail = req.decoded.email;
+        // const query = { email: decodedEmail};
+        // const user = await User.findOne(query);
+        // if(user?.role !== 'admin') {
+        //     return res.status(403).send({message: 'forbidden access'})
+        // }
 
         const id = req.params.id;
         const filter = { _id: ObjectId(id) };
