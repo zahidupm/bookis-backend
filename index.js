@@ -355,7 +355,7 @@ app.get('/users/admin/:email', async (req, res) => {
 })
 
 // all sellers
-app.get('/users/all_sellers', verifyJWT, verifyAdmin, async (req, res) => {
+app.get('/users/all_sellers', async (req, res) => {
     try {
         const role = req.query.role;
         // const query = { role: role}
